@@ -41,12 +41,13 @@ MEMORY
 FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 1024K
 RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
 ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
+SDRAM (xrw)     : ORIGIN = 0xD0100000, LENGTH = 31M
 }
 /* Highest address of the user mode stack */
 _estack = 0x20020000;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x200;      /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
+_Min_Heap_Size = 0x2000;      /* required amount of heap (8KB for TouchGFX C++ allocations) */
+_Min_Stack_Size = 0x4000; /* required amount of stack (16KB for C++ init + ISR) */
 
 /* Define output sections */
 SECTIONS
@@ -207,6 +208,22 @@ SECTIONS
   PROVIDE( __bss_start = __tbss_start );
   PROVIDE( __bss_size = __bss_end - __bss_start );
 
+
+  /* Crash info preserved across resets */
+  .crash (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.crash))
+    . = ALIGN(4);
+  } >RAM
+
+  /* FreeRTOS heap in SDRAM — frees DTCM for application use */
+  .sdram_heap (NOLOAD) :
+  {
+    . = ALIGN(8);
+    KEEP(*(.sdram_heap))
+    . = ALIGN(8);
+  } >SDRAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack (NOLOAD) :

@@ -90,8 +90,9 @@ uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32
 
     if (ret != HAL_OK) return 1;
 
-    /* PLL2: 25/25*440=440MHz VCO, /2=220MHz PLL2R for FMC */
-    rcc_periph_clk_init.PeriphClockSelection = RCC_PERIPHCLK_FMC;
+    /* PLL2: 25/25*440=440MHz VCO, /2=220MHz PLL2R for FMC
+     * PLL3: 25/25*300=300MHz VCO, /9=33.33MHz PLL3R for LTDC */
+    rcc_periph_clk_init.PeriphClockSelection = RCC_PERIPHCLK_FMC | RCC_PERIPHCLK_LTDC;
     rcc_periph_clk_init.PLL2.PLL2M = 25;
     rcc_periph_clk_init.PLL2.PLL2N = 440;
     rcc_periph_clk_init.PLL2.PLL2P = 2;
@@ -99,6 +100,14 @@ uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32
     rcc_periph_clk_init.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_0;
     rcc_periph_clk_init.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
     rcc_periph_clk_init.PLL2.PLL2FRACN = 0;
+    rcc_periph_clk_init.PLL3.PLL3M = 25;
+    rcc_periph_clk_init.PLL3.PLL3N = 300;
+    rcc_periph_clk_init.PLL3.PLL3P = 2;
+    rcc_periph_clk_init.PLL3.PLL3Q = 2;
+    rcc_periph_clk_init.PLL3.PLL3R = 9;
+    rcc_periph_clk_init.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_0;
+    rcc_periph_clk_init.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
+    rcc_periph_clk_init.PLL3.PLL3FRACN = 0;
     rcc_periph_clk_init.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
     ret = HAL_RCCEx_PeriphCLKConfig(&rcc_periph_clk_init);
 

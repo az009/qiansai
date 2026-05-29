@@ -12,7 +12,10 @@
 #include "delay.h"
 #include "mpu.h"
 #include "sdram.h"
-#include "lcd.h"
+
+/* TouchGFX C-callable wrappers (defined in TouchGFX/target/TouchGFXConfiguration.cpp) */
+extern void TouchGFX_Init(void);
+extern void TouchGFX_StartTask(void);
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -47,7 +50,10 @@ int main(void)
 
   mpu_memory_protection();                /* MPU: SDRAM cacheable, FMC non-cacheable, etc. */
   sdram_init();                           /* SDRAM: CAS=2, SDCLK=110MHz */
-  lcd_init();                             /* LCD: auto-detect panel, init LTDC */
+
+  /* ---- TouchGFX ---- */
+  TouchGFX_Init();                        /* TouchGFX HAL + framebuffer at 0xD0000000 */
+  TouchGFX_StartTask();                   /* Create GUI FreeRTOS task */
 
   /* ---- FreeRTOS ---- */
   osKernelInitialize();

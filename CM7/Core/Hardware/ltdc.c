@@ -1,7 +1,5 @@
 #include "ltdc.h"
-#include "lcd.h"
 #include "delay.h"
-#include "tft_spi.h"
 
 LTDC_HandleTypeDef  g_ltdc_handle;
 DMA2D_HandleTypeDef g_dma2d_handle;
@@ -276,9 +274,6 @@ void ltdc_init(void)
 
     lcdid = ltdc_panelid_read();
 
-    if (lcdid == 0X5571)
-        tft_spi_init();
-
 #if RGB_80_8001280
     lcdid = 0X8081;
 #endif
@@ -333,8 +328,6 @@ void ltdc_init(void)
         ltdc_clk_set(300, 25, 5);    /* 60MHz */
     }
 
-    lcddev.width = lcdltdc.pwidth;
-    lcddev.height = lcdltdc.pheight;
     lcdltdc.pixformat = LTDC_PIXFORMAT;
 
 #if LTDC_PIXFORMAT == LTDC_PIXFORMAT_ARGB8888
@@ -396,7 +389,7 @@ void ltdc_init(void)
     }
 
     LTDC_BL(1);
-    ltdc_clear(0XFFFFFFFF);
+    ltdc_clear(0x0000F800);  /* Diagnostic: clear to RED (RGB565=0xF800) instead of white */
 }
 
 void HAL_LTDC_MspInit(LTDC_HandleTypeDef *hltdc)
