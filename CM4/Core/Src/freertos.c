@@ -120,7 +120,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  xTaskCreate(Proto_Select, "Proto_Select", 256, NULL, osPriorityAboveNormal,
+  xTaskCreate(Proto_Select, "Proto_Select", 512, NULL, osPriorityAboveNormal,
               &proto_select_handle);
 
   /* 数据采集控制任务（轮询 SHM_CONFIG->dcmi_enable / dma_catch_enable）*/
@@ -166,13 +166,26 @@ void StartDefaultTask(void *argument)
  *   3. 立刻回到 1（继续等下一次 M7 通知）
  *
  *   从机/接收模式下协议 Task 永远运行，M7 切协议时 Proto_Select 杀掉旧的换新的。 */
+volatile uint32_t g_hsem_isr_count = 0;  /* 诊断:HSEM ISR 触发计数(callback ++, Proto_Select 打印) */
 void Proto_Select(void *argument){
   static TaskHandle_t active_proto_task = NULL;
+  uart1_printf("[CM4] Proto_Select: started, waiting sem\r\n");
 
   for(;;)
   {
-    /* 等待 CM7 的 HSEM 通知 */
-    xSemaphoreTake(hsem_config_sem, portMAX_DELAY);
+    /* 等待 CM7 的 HSEM 通知(1 秒超时,定时打印 isr/cm7_notify 对比) */
+    if (xSemaphoreTake(hsem_config_sem, 1000) != pdPASS) {
+      uart1_printf("[CM4] wait: isr=%u, cm7_notify=%u\r\n",
+                   (unsigned)g_hsem_isr_count,
+                   (unsigned)SHM_STATUS->reserved[0]);
+      continue;
+    }
+    uint32_t drain = 0;
+    while (drain < 50 && xSemaphoreTake(hsem_config_sem, 0) == pdPASS) drain++;
+    uart1_printf("[CM4] woke: active=%u, isr=%u, drain=%u, cm7_notify=%u\r\n",
+                 (unsigned)SHM_CONFIG->active_proto,
+                 (unsigned)g_hsem_isr_count, (unsigned)drain,
+                 (unsigned)SHM_STATUS->reserved[0]);
 
     /* 如果上一次的协议还在运行，就把这个协议删掉 */
     if (active_proto_task != NULL) {
@@ -347,6 +360,7 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
   if (SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_ID_CONFIG))
   {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    g_hsem_isr_count++;  /* 诊断:ISR 触发计数 */
     xSemaphoreGiveFromISR(hsem_config_sem, &xHigherPriorityTaskWoken);
     /* 重新激活通知：确保下次 CM7 Release 仍触发中断 */
     HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_CONFIG));

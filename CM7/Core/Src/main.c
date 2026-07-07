@@ -120,6 +120,7 @@ void MX_FREERTOS_Init(void);
 void shm_config_notify(void)
 {
     __DSB();   /* 确保共享内存写入对 CM4 可见(non-cacheable 下双保险) */
+    SHM_STATUS->reserved[0]++;   /* 诊断:CM7 调 notify 计数(CM4 Proto_Select 读) */
     /* Take + Release 产生 free 事件 → 触发 CM4 HSEM 中断读 config。
      * 直接 Release 空闲态 semaphore 不触发中断，必须先 Take 锁定再释放。
      * CM4 不持有该 semaphore（FreeCallback 只置 flag 不 Take），Take 总成功。*/
