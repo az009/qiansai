@@ -357,18 +357,10 @@ void UART_Callback_Task(void *argument){
             //M4将数据推送到共享环形缓冲区
             //先告诉M7包头格式
             
-            shm_push(0xFD);
-            shm_push(0xAA);             //uart的帧头
-            shm_push_u16(uart_analysis.rx_frame_size);      // 数据长度
-            shm_push_u32(uart_analysis.total_interval);
-            shm_push_u32(uart_analysis.success_count);
-            shm_push_u32(uart_analysis.error_count);
-            shm_push(ERROR_WINDOW_SIZE);
-            //推送接收的数据
+            //只推送接收的数据裸字节(去 magic/统计/error_history,适配 CM7 waveWidget 不解析帧)
             uint8_t tempo_buffer[uart_analysis.rx_frame_size];
             My_UART_Read_RingBuffer(tempo_buffer, uart_analysis.rx_frame_size);
             shm_push_buf(tempo_buffer, uart_analysis.rx_frame_size);
-            shm_push_buf(uart_errors.error_history, ERROR_WINDOW_SIZE);
             
         }else if (xSemaphoreTake(uart_txcallback_semaphore, 0) == pdPASS) {
             /* TX 完成 → 通知 M7 */

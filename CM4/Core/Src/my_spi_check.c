@@ -482,17 +482,9 @@ void SPI_Callback_Task(void *argument){
                 spi_analyse.cs_gap_tick = spi_analyse.cs_hight_tick - spi_analyse.cs_low_tick; 
                 spi_analyse.cs_last_hight_tick = spi_analyse.cs_hight_tick;
                 
-                shm_push(0xFD);
-                shm_push(0xBB);                 //spi的帧头
-                shm_push_u16(spi_analyse.spi_rx_len);      // 数据长度
-                shm_push_u32(spi_analyse.cs_gap_tick);
-                shm_push_u32(spi_analyse.spi_frame_gap);
-                shm_push_u16(spi_analyse.spi_total_frame);
-                shm_push_float(spi_analyse.transmit_success_rate);
-                shm_push_u32(spi_error_code.error_code);
                 uint8_t tempo_buffer[spi_analyse.spi_rx_len];
                 SPI_RangeBuffer_Read(tempo_buffer, spi_analyse.spi_rx_len);
-                //推送接收的数据
+                //只推送接收的数据裸字节(去 magic/统计,适配 CM7 waveWidget 不解析帧)
                 shm_push_buf(tempo_buffer, spi_analyse.spi_rx_len);
 
             }

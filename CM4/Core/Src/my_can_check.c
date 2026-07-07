@@ -518,13 +518,9 @@ void CAN_Callback_Task(void *argument)
                     (msg.id_type == CAN_ID_EXTENDED) ? 1 : 0);
 
                 /* 推送单条 CAN 报文到共享环形缓冲区 */
-                shm_push(0xFD);
-                shm_push(0xCC);                       // CAN 协议标记
-                shm_push_u32(msg.can_id);             // 报文 ID
-                shm_push((uint8_t)msg.id_type);       // 0=标准, 1=扩展
-                shm_push((uint8_t)msg.frametype);     // 0=数据, 1=遥控
-                shm_push(dlc_len);                    // 数据字节数
-                shm_push_buf(msg.my_can_data, dlc_len); // 数据内容
+                /* 只推送接收的数据裸字节(去 magic/元数据,适配 CM7 waveWidget 不解析帧)
+                 * dlc_len/can_id 等统计逻辑仍保留(CAN_ID_Frequence 上方已调用) */
+                shm_push_buf(msg.my_can_data, dlc_len);
                 uart1_printf("%02X %02X %02X %02X\r\n",msg.my_can_data[0],msg.my_can_data[1],
                 msg.my_can_data[2],msg.my_can_data[3]);
             }

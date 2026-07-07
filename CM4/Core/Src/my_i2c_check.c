@@ -621,14 +621,8 @@ void I2C_Callback_Task(void *argument)
 					Frame_Analyse();
 					I2C_PutData_To_Buffer();
 
-					shm_push(0xFD);
-					shm_push(0xDD);                    // I2C 帧标记
-					shm_push_u16(my_i2c_data.i2c_master_rxlen);
-
-					shm_push_u32(my_i2c_analyse.clock_stretch_total);
-					shm_push_u32(my_i2c_analyse.i2c_err.error_code);
-
-					/* 从环形缓冲区读出数据推给 CM7 */
+					/* 从环形缓冲区读出数据推给 CM7
+					 * 只推送裸数据(去 magic/统计,适配 CM7 waveWidget 不解析帧) */
 					uint8_t tempo_buffer[my_i2c_data.i2c_master_rxlen];
 					I2C_RangeBuffer_Read(tempo_buffer, my_i2c_data.i2c_master_rxlen);
 					shm_push_buf(tempo_buffer, my_i2c_data.i2c_master_rxlen);
@@ -654,17 +648,9 @@ void I2C_Callback_Task(void *argument)
 				Frame_Analyse();
 				uart1_printf("%02X %02X %02X %02X\r\n",my_i2c_data.i2c_slave_rxdata[0],
 				my_i2c_data.i2c_slave_rxdata[1],my_i2c_data.i2c_slave_rxdata[2],my_i2c_data.i2c_slave_rxdata[3]);
-				shm_push(0xFD);
-				shm_push(0xDD);                    // I2C 帧标记
-				shm_push_u16(my_i2c_data.i2c_slave_rxlen);
-
-				shm_push_u32(my_i2c_analyse.total_frame);
-				shm_push_u16(my_i2c_analyse.tfstfd_max);
-				shm_push_float(my_i2c_analyse.success_rate);
-				shm_push_u32(my_i2c_analyse.i2c_err.error_code);
-
 				uint8_t tempo_buffer[my_i2c_data.i2c_slave_rxlen];
 				I2C_RangeBuffer_Read(tempo_buffer, my_i2c_data.i2c_slave_rxlen);  // 修复：原 SPI_ → I2C_
+				/* 只推送裸数据(去 magic/统计,适配 CM7 waveWidget 不解析帧) */
 				shm_push_buf(tempo_buffer, my_i2c_data.i2c_slave_rxlen);
 				
 			}
