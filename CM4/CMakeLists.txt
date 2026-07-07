@@ -64,6 +64,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/my_i2c_check.c
     Core/Src/my_spi_check.c
     Core/Src/my_dwt_count.c
+    Core/Src/adc_cpld.c
+    Core/Src/my_dma_catch.c
+    Core/Src/usart_printf.c
+    Core/Src/stm32h7xx_hal_timebase_tim.c
 )
 
 # Link directories setup
