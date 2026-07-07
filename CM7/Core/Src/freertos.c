@@ -30,6 +30,7 @@
 #include "FreeRTOSConfig.h"
 #include "shared_buf.h"
 #include "shared_config.h"   /* proto_config_t / SHM_CONFIG / REC_MAGIC（录制 header 读写）*/
+#include "pin_switch.h"  /* Select_Pin：开机按保存的协议切 MUX 路由 */
 #include "fatfs.h"          /* f_mount/f_open/f_write + SDFatFS/SDPath/FIL */
 #include "sdmmc.h"          /* hsd2（HAL_SD_GetCardInfo 填容量给 SD_Test_Screen）*/
 #include <stdio.h>          /* snprintf（文件序号命名）*/
@@ -243,6 +244,10 @@ void StartDefaultTask(void *argument)
   }
   SCB_CleanDCache_by_Addr((uint32_t*)SHM_CONFIG_ADDR, sizeof(proto_config_t) + 32);
   shm_config_notify();   /* HSEM_ID_1 → CM4 apply 读到的配置（和 Settings Apply 同路）*/
+  /* 拓展板 MUX：开机按保存的协议切外部接口路由（active_proto 1-4 → Pin_Select）*/
+  { static const Pin_Select pmap[5] = {NONE_Pin, UART_Pin, SPI_Pin, I2C_Pin, CAN_Pin};
+    uint8_t ap = SHM_CONFIG->active_proto;
+    Select_Pin((ap >= 1 && ap <= 4) ? pmap[ap] : NONE_Pin); }
   extern volatile uint8_t g_config_loaded;
   g_config_loaded = 1;   /* 通知屏幕 tick：配置已加载，重读 SHM_CONFIG 刷新显示（治"开机先显示默认"）*/
 

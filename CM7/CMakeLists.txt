@@ -107,6 +107,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Hardware/ft5206.c
     Core/Hardware/touch.c
     Core/Src/crc.c
+    Core/Src/pin_switch.c   # 拓展板协议引脚 MUX 切换(U1/U2 A0/A1/EN)
     # TouchGFX HAL callbacks (C++ bridge from LTDC ISR to OSWrappers)
     Core/Src/touchgfx_callbacks.cpp
     # TouchGFX target HAL (C++) — these are user-editable, NOT in cmake/touchgfx

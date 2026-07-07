@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <shared_config.h>
 #include "stm32h7xx.h"   /* SCB_Clean/InvalidateDCache_by_Addr（SHM_CONFIG 在 SRAM1，CM7 DCache 维护）*/
+#include "pin_switch.h"  /* Select_Pin：拓展板协议引脚 MUX 切换 */
 
 /* CM7 main.c 提供的 HSEM 通知 shim（C++ 不直接碰 HAL，通过 extern "C" 调）*/
 extern "C" void shm_config_notify(void);
@@ -274,6 +275,9 @@ void Settings_ScreenView::applyConfig()
     shm_config_notify();   /* __DSB + HAL_HSEM_Release(HSEM_ID_CONFIG) → CM4 中断读 */
     extern volatile uint8_t g_config_dirty;
     g_config_dirty = 1;    /* 持久化：defaultTask 见 flag → f_write config.bin 覆盖（不在 UI 线程直接写 SD）*/
+    /* 拓展板 MUX：切协议引脚路由到外部接口（和 CM4 外设重配同步）。
+     * protoIdx: 0=UART,1=SPI,2=I2C,3=CAN → Pin_Select enum(UART=0,I2C=1,SPI=2,CAN=3)*/
+    Select_Pin((Pin_Select[]){UART_Pin, SPI_Pin, I2C_Pin, CAN_Pin}[protoIdx]);
     /* snap 更新为当前（已应用），避免同一次会话内重复弹窗 */
     snap.protoIdx = protoIdx;
     snap.uBaud = uBaud; snap.uData = uData; snap.uStop = uStop; snap.uPar = uPar; snap.uFlow = uFlow;
