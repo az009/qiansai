@@ -30,6 +30,9 @@ uint8_t temp_dma_notice = 0;
  *============================================================================*/
 void My_DMA_Catch_Init(void)
 {
+#if 0   /* ── DMA_Catch 暂未启用：本工程 CubeMX 只配了 TIM2(DCMI PWM),没配 TIM1+DMA1_Stream3。
+         * 等用户后续在 CubeMX 里把 TIM1 + DMA1_Stream3(TRIG=TIM1_UP) 配上,再恢复 #if 0 段。
+         * DMA_Catch_Ctrl_Task 只读 dma_catch_enable(默认 0) → 不会进这里,所以 stub 安全。 */
     /* 1. 创建信号量（初始 0，ISR 中 Give）*/
 
     /* 2. 重新配置 DMA 为 CIRCULAR 模式 */
@@ -59,6 +62,7 @@ void My_DMA_Catch_Init(void)
     /* 7. 启动定时器触发 DMA */
     __HAL_TIM_ENABLE_DMA(&htim1, TIM_DMA_UPDATE);
     HAL_TIM_Base_Start(&htim1);
+#endif
 }
 
 /*==============================================================================
@@ -66,12 +70,14 @@ void My_DMA_Catch_Init(void)
  *============================================================================*/
 void My_DMA_Catch_Stop(void)
 {
+#if 0   /* 同 My_DMA_Catch_Init:TIM1 未配,stub */
     HAL_TIM_Base_Stop(&htim1);
     __HAL_TIM_DISABLE_DMA(&htim1, TIM_DMA_UPDATE);
     HAL_DMA_Abort(&hdma_tim1_up);
     DMA_CATCH_CTRL->batch_ready  = 0;
     DMA_CATCH_CTRL->sample_count = 0;
     __DMB();
+#endif
 }
 
 /*==============================================================================
@@ -112,7 +118,7 @@ void HAL_DMA_XferCpltCallback(DMA_HandleTypeDef *hdma)
 GPIO_State my_gpio_check(void)
 {
     static GPIO_State my_gpio_state;
-
+#if 0   /* 同 My_DMA_Catch_Init:TIM1/DMA1_Stream3 未配,返回零结构体 */
     /* 用 DMA NDTR 计数器推算出当前写指针 */
     uint16_t tail = (uint16_t)(FULL_SIZE - __HAL_DMA_GET_COUNTER(&hdma_tim1_up));
     if (tail >= FULL_SIZE) tail = 0;
@@ -126,7 +132,11 @@ GPIO_State my_gpio_check(void)
     if ((dma_read_head != tail) && ((tail + 1U) % FULL_SIZE != dma_read_head)) {
         dma_read_head = (uint16_t)((dma_read_head + 1U) % FULL_SIZE);
     }
-
+#else
+    my_gpio_state.PG7_State  = 0;
+    my_gpio_state.PG10_State = 0;
+    my_gpio_state.PG12_State = 0;
+#endif
     return my_gpio_state;
 }
 

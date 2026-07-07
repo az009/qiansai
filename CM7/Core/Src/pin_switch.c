@@ -48,3 +48,10 @@ void Select_Pin(Pin_Select a){
         break;
     }
 }
+
+/* active_proto 1=UART,2=SPI,3=I2C,4=CAN → Pin_Select。越界(0/>4)→ NONE 断开。
+ * 三处调用:数据屏切录制协议(defaultTask) / Settings Apply / 开机 config-load。*/
+void Select_Pin_ByProto(uint8_t active_proto){
+    static const Pin_Select pmap[5] = {NONE_Pin, UART_Pin, SPI_Pin, I2C_Pin, CAN_Pin};
+    Select_Pin((active_proto >= 1U && active_proto <= 4U) ? pmap[active_proto] : NONE_Pin);
+}

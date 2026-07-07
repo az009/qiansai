@@ -276,8 +276,8 @@ void Settings_ScreenView::applyConfig()
     extern volatile uint8_t g_config_dirty;
     g_config_dirty = 1;    /* 持久化：defaultTask 见 flag → f_write config.bin 覆盖（不在 UI 线程直接写 SD）*/
     /* 拓展板 MUX：切协议引脚路由到外部接口（和 CM4 外设重配同步）。
-     * protoIdx: 0=UART,1=SPI,2=I2C,3=CAN → Pin_Select enum(UART=0,I2C=1,SPI=2,CAN=3)*/
-    Select_Pin((Pin_Select[]){UART_Pin, SPI_Pin, I2C_Pin, CAN_Pin}[protoIdx]);
+     * protoIdx 0-3 → active_proto 1-4（Select_Pin_ByProto 内部做映射）*/
+    Select_Pin_ByProto(protoIdx + 1);
     /* snap 更新为当前（已应用），避免同一次会话内重复弹窗 */
     snap.protoIdx = protoIdx;
     snap.uBaud = uBaud; snap.uData = uData; snap.uStop = uStop; snap.uPar = uPar; snap.uFlow = uFlow;

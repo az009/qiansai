@@ -56,14 +56,17 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef hdma_dcmi;
+/* 适配：本工程未配 DCMI 的 DMA 流 + TIM1 DMA,这两个 handle 不存在。
+ * CubeMX regen 后若启用 DCMI DMA / TIM1+DMA1_Stream3,恢复这两行 + 对应 ISR body。
+ * 当前 DMA2_Stream0 / DMA1_Stream3 IRQ 未在 NVIC 使能,ISR 永不进。*/
+/* extern DMA_HandleTypeDef hdma_dcmi; */   /* 本工程 DCMI 未接 DMA 流 */
 extern DCMI_HandleTypeDef hdcmi;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern I2C_HandleTypeDef hi2c4;
 extern DMA_HandleTypeDef hdma_spi6_rx;
 extern DMA_HandleTypeDef hdma_spi6_tx;
 extern SPI_HandleTypeDef hspi6;
-extern DMA_HandleTypeDef hdma_tim1_up;
+/* extern DMA_HandleTypeDef hdma_tim1_up; */ /* 本工程未配 TIM1 */
 extern DMA_HandleTypeDef hdma_usart6_rx;
 extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim7;
@@ -192,7 +195,8 @@ void DMA1_Stream3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream3_IRQn 0 */
 
   /* USER CODE END DMA1_Stream3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim1_up);
+  /* 适配：本工程未配 TIM1+DMA1_Stream3,ISR body 留空(TIM1 不会启,IRQ 不触发)。
+   * CubeMX regen 配上 TIM1+DMA1_Stream3 后恢复 HAL_DMA_IRQHandler(&hdma_tim1_up); */
   /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
 
   /* USER CODE END DMA1_Stream3_IRQn 1 */
@@ -262,7 +266,8 @@ void DMA2_Stream0_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
 
   /* USER CODE END DMA2_Stream0_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_dcmi);
+  /* 适配：本工程 DCMI 未接 DMA 流(DCMI_Mode 配 ContinuousCapture 但 DMA 没连),
+   * ISR body 留空。CubeMX regen 在 DCMI 上挂 DMA2_Stream0 后恢复 HAL_DMA_IRQHandler(&hdma_dcmi); */
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
 
   /* USER CODE END DMA2_Stream0_IRQn 1 */

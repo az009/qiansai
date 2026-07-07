@@ -18,6 +18,10 @@ typedef enum {
 extern "C" {
 #endif
 void Select_Pin(Pin_Select a);
+
+/* 按 active_proto(1=UART,2=SPI,3=I2C,4=CAN)切 MUX。
+ * 数据屏切协议 / Settings Apply / 开机 config-load 共用，避免 pmap 映射在各处重复。*/
+void Select_Pin_ByProto(uint8_t active_proto);
 #ifdef __cplusplus
 }
 #endif

@@ -245,9 +245,7 @@ void StartDefaultTask(void *argument)
   SCB_CleanDCache_by_Addr((uint32_t*)SHM_CONFIG_ADDR, sizeof(proto_config_t) + 32);
   shm_config_notify();   /* HSEM_ID_1 → CM4 apply 读到的配置（和 Settings Apply 同路）*/
   /* 拓展板 MUX：开机按保存的协议切外部接口路由（active_proto 1-4 → Pin_Select）*/
-  { static const Pin_Select pmap[5] = {NONE_Pin, UART_Pin, SPI_Pin, I2C_Pin, CAN_Pin};
-    uint8_t ap = SHM_CONFIG->active_proto;
-    Select_Pin((ap >= 1 && ap <= 4) ? pmap[ap] : NONE_Pin); }
+  Select_Pin_ByProto(SHM_CONFIG->active_proto);
   extern volatile uint8_t g_config_loaded;
   g_config_loaded = 1;   /* 通知屏幕 tick：配置已加载，重读 SHM_CONFIG 刷新显示（治"开机先显示默认"）*/
 
@@ -424,6 +422,14 @@ void StartDefaultTask(void *argument)
             extern volatile uint8_t g_record_discard;
             if (g_record_discard) { g_record_discard = 0U; f_unlink(current_path); }  /* modal"不保存"切换：删当前 */
           }
+          /* 切协议三同步(开新文件前)：改 active_proto → HSEM 通知 CM4 重配外设 → MUX 切通道。
+           * 必须在写 header 前改：header 里的 active_proto 才是新协议，回放 framing 正确。
+           * 各协议参数(baudrate/mode 等)不碰，用之前 Settings 存的值。*/
+          SHM_CONFIG->active_proto = req;
+          __DSB();
+          SCB_CleanDCache_by_Addr((uint32_t*)SHM_CONFIG_ADDR, sizeof(proto_config_t) + 32);
+          shm_config_notify();
+          Select_Pin_ByProto(req);
           /* 挑最旧(或空)槽位写，避免盲目轮转覆盖较新的已保存录制。
            * f_stat 扫 PROTO_FILE_COUNT 个槽位：空槽(FR_NO_FILE)优先 → 不破坏任何已存文件；
            * 全满则覆盖 mtime 最旧的（真·保留最近 N 个）。f_stat DISK_ERR 重试 3 次（SD NAND 偶发）。*/
