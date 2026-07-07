@@ -21,10 +21,12 @@
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 #include "bdma.h"
+#include "dcmi.h"
 #include "dma.h"
 #include "fdcan.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -142,6 +144,8 @@ int main(void)
   MX_I2C4_Init();
   MX_USART1_UART_Init();
   MX_SPI6_Init();
+  MX_DCMI_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   uart1_printf("\r\n[CM4] enter USER CODE 2 (boot sync 已过)\r\n");
   My_UART_Init();   /* 启动 USART6 DMA + IDLE 空闲中断接收 */
