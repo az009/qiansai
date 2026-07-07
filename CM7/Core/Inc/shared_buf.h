@@ -2,9 +2,9 @@
 #define __SHARED_BUF_H
 
 #include <stdint.h>
-
-/* CM4↔CM7 共享内存环形缓冲（SRAM4 / D3 domain 0x38000000，双核共享）
- * MPU 已把 SRAM4 配为 shareable + non-cacheable，单生产者(CM4)单消费者(CM7)
+#include "string.h"
+/* CM4↔CM7 共享内存环形缓冲（SRAM1 / D2 domain 0x30000000，双核共享）
+ * MPU 已把 SRAM1 配为 shareable + non-cacheable，单生产者(CM4)单消费者(CM7)
  * 的无锁环形缓冲，不需要 HSEM。 */
 #define SHM_BUF_ADDR    0x30000000U   /* SRAM1 (D2域), CM4直接访问, CM7跨域访问 */
 #define SHM_BUF_SIZE    2048U   /* 2KB 字节缓冲 */
@@ -44,10 +44,46 @@ static inline int shm_pop(uint8_t *b) {
     return 1;
 }
 
+/* CM7 批量读取：读到 buf 中，最多 len 字节，返回实际读到的字节数 */
+static inline uint16_t shm_pop_buf(uint8_t *buf, uint16_t len) {
+    uint16_t rd = 0;
+    while (rd < len && SHM_RING->head != SHM_RING->tail) {
+        buf[rd++] = SHM_RING->data[SHM_RING->tail];
+        SHM_RING->tail = (uint16_t)((SHM_RING->tail + 1U) % SHM_BUF_SIZE);
+    }
+    return rd;
+}
+
 /* CM7 查询缓冲里还有多少字节没读 */
 static inline uint16_t shm_count(void) {
     int16_t n = (int16_t)SHM_RING->head - (int16_t)SHM_RING->tail;
     return (uint16_t)((n >= 0) ? n : n + SHM_BUF_SIZE);
+}
+
+/* 多字节写入 */
+static inline void shm_push_u16(uint16_t val) {
+    shm_push((uint8_t)(val));
+    shm_push((uint8_t)(val >> 8));
+}
+
+static inline void shm_push_u32(uint32_t val) {
+    shm_push((uint8_t)(val));
+    shm_push((uint8_t)(val >> 8));
+    shm_push((uint8_t)(val >> 16));
+    shm_push((uint8_t)(val >> 24));
+}
+
+static inline void shm_push_float(float val) {
+    uint32_t raw;
+    memcpy(&raw, &val, 4);              // 把 float 的 4 字节原样复制到 uint32_t
+    shm_push_u32(raw);              // 再推出去
+}
+
+/* 写一整个字节数组到共享环 */
+static inline void shm_push_buf(const uint8_t *data, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++) {
+        shm_push(data[i]);
+    }
 }
 
 #endif /* __SHARED_BUF_H */
