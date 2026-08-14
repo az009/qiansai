@@ -55,16 +55,21 @@ enable_language(C ASM)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     ${CMAKE_CURRENT_SOURCE_DIR}/../Common/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules/Protocols/UART
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules/Protocols/SPI
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules/Protocols/I2C
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules/Protocols/CAN
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules/Protocols/Timing
 )
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
-    Core/Src/my_uart_check.c
-    Core/Src/my_can_check.c
-    Core/Src/my_i2c_check.c
-    Core/Src/my_spi_check.c
-    Core/Src/my_dwt_count.c
+    Modules/Protocols/UART/my_uart_check.c
+    Modules/Protocols/SPI/my_spi_check.c
+    Modules/Protocols/I2C/my_i2c_check.c
+    Modules/Protocols/CAN/my_can_check.c
+    Modules/Protocols/Timing/my_dwt_count.c
 )
 
 # Link directories setup

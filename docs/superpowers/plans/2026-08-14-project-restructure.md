@@ -64,10 +64,10 @@
 - Consumes: existing public functions used by `CM4/Core/Src/main.c`
 - Produces: unchanged public APIs in protocol-specific directories
 
-- [ ] Move each protocol pair with `git mv`
-- [ ] Add the module sources and include directories to `CM4/CMakeLists.txt`
-- [ ] Build CM4
-- [ ] Inspect compile commands to prove each module source compiles from its new location
+- [x] Move each protocol pair with `git mv`
+- [x] Add the module sources and include directories to `CM4/CMakeLists.txt`
+- [x] Build CM4
+- [x] Inspect compile commands to prove each module source compiles from its new location
 - [ ] Commit `refactor: organize cm4 protocol modules`
 
 ### Task 4: Add Module Verification
