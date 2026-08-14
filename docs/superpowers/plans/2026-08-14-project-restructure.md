@@ -79,11 +79,11 @@
 **Interfaces:**
 - Produces: `tools/verify.ps1 [-Clean]`, which validates shared-header uniqueness, configures/builds CM4 and CM7, and checks both ELF artifacts
 
-- [ ] Implement tool discovery for STM32Cube CMake and Ninja
-- [ ] Implement CM4 and CM7 build commands
-- [ ] Implement artifact existence checks
-- [ ] Implement duplicate shared-header checks
-- [ ] Run `tools/verify.ps1 -Clean`
+- [x] Implement tool discovery for STM32Cube CMake and Ninja
+- [x] Implement CM4 and CM7 build commands
+- [x] Implement artifact existence checks
+- [x] Implement duplicate shared-header checks
+- [x] Run `tools/verify.ps1 -Clean`
 - [ ] Commit `build: add modular firmware verification`
 
 ### Task 5: Final Branch Delivery
