@@ -30,10 +30,10 @@
 - Consumes: existing ignored path `CM7/Core/example/`
 - Produces: a Git history that no longer carries the vendor example tree or its generated `.hex`/`.map` files
 
-- [ ] Run `git rm -r --cached -- CM7/Core/example`
-- [ ] Verify local files still exist and `git status` only reports deletions from Git tracking
-- [ ] Run the root aggregate build
-- [ ] Commit `chore: remove vendor examples from git tracking`
+- [x] Run `git rm -r --cached -- CM7/Core/example`
+- [x] Verify local files still exist and `git status` only reports deletions from Git tracking
+- [x] Run the root aggregate build
+- [x] Commit `chore: remove vendor examples from git tracking`
 
 ### Task 2: Consolidate Cross-Core Headers
 
@@ -46,11 +46,11 @@
 - Consumes: the existing `shared_ring_t`, `shm_push`, `proto_config_t`, shared-memory addresses, and HSEM IDs
 - Produces: one authoritative header set under `Common/Inc`
 
-- [ ] Compare both copies byte-for-byte before choosing the source
-- [ ] Move the headers with `git mv`
-- [ ] Add `${CMAKE_CURRENT_SOURCE_DIR}/../Common/Inc` to both core targets
-- [ ] Build CM4 and CM7 independently
-- [ ] Search the repository to prove no duplicate shared header remains in Git
+- [x] Compare both copies byte-for-byte before choosing the source
+- [x] Move the headers with `git mv`
+- [x] Add `${CMAKE_CURRENT_SOURCE_DIR}/../Common/Inc` to both core targets
+- [x] Build CM4 and CM7 independently
+- [x] Search the repository to prove no duplicate shared header remains in Git
 - [ ] Commit `refactor: consolidate dual-core shared headers`
 
 ### Task 3: Organize CM4 Protocol Modules
