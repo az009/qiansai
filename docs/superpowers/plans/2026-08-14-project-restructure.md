@@ -94,7 +94,7 @@
 **Interfaces:**
 - Produces: a remote branch named `codex/restructure-project`
 
-- [ ] Run the full verification script from a clean build
-- [ ] Review `git status`, `git diff --stat`, and commit history
-- [ ] Write the branch handoff
+- [x] Run the full verification script from a clean build
+- [x] Review `git status`, `git diff --stat`, and commit history
+- [x] Write the branch handoff
 - [ ] Push `codex/restructure-project` to `origin`
