@@ -57,6 +57,7 @@ set_target_properties(stm32cubemx PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${_t
 target_include_directories(TouchGFX PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Hardware
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Common/Inc
 )
 
 
@@ -76,6 +77,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Core/Inc
     Core/Hardware
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Common/Inc
     Drivers/STM32H7xx_HAL_Driver/Inc
     Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
     # TouchGFX project includes
